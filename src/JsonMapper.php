@@ -242,6 +242,12 @@ final class JsonMapper
                 }
             }
 
+            foreach ($parameterType->types as $type) {
+                if ($type->name == DateTime::class){
+                    return new DateTime($jsonValue);
+                }
+            }
+
             // TODO "Parameter %s of class %s does not accept string" + JSON path
             throw new JsonMapperException('Property ' . $jsonPropertyName . ' cannot be a string.');
         }
@@ -254,6 +260,13 @@ final class JsonMapper
             foreach ($parameterType->enumTypes as $enumType) {
                 if ($enumType->isIntBacked) {
                     return ($enumType->name)::from($jsonValue);
+                }
+            }
+
+            foreach ($parameterType->types as $type) {
+                if ($type->name == DateTime::class){
+                    $dt = new DateTime();
+                    return $dt->setTimestamp($jsonValue);
                 }
             }
 
