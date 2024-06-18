@@ -6,12 +6,12 @@ namespace Brick\JsonMapper\Reflection;
 
 use BackedEnum;
 use Brick\JsonMapper\JsonMapperException;
+use Brick\JsonMapper\Reflection\ImportResolver;
 use Brick\JsonMapper\Reflection\Type\ArrayType;
 use Brick\JsonMapper\Reflection\Type\ClassType;
 use Brick\JsonMapper\Reflection\Type\EnumType;
 use Brick\JsonMapper\Reflection\Type\SimpleType;
 use Brick\JsonMapper\Reflection\Type\UnionType;
-use Brick\Reflection\ImportResolver;
 use LogicException;
 use ReflectionEnum;
 use ReflectionIntersectionType;
