@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Brick\JsonMapper;
 
+use Brick\JsonMapper\NameMapper\INameMapper;
 use Brick\JsonMapper\NameMapper\NullMapper;
 use Brick\JsonMapper\Reflection\Reflector;
 use Brick\JsonMapper\Reflection\Type\UnionType;
+use DateTime;
 use JsonException;
 use LogicException;
 use ReflectionClass;
@@ -58,13 +60,7 @@ final class JsonMapper
          * Mapper to convert JSON property names to PHP property names.
          * By default, no conversion is performed.
          */
-        private readonly NameMapper $jsonToPhpNameMapper = new NullMapper(),
-
-        /**
-         * Mapper to convert PHP property names to JSON property names.
-         * By default, no conversion is performed.
-         */
-        private readonly NameMapper $phpToJsonNameMapper = new NullMapper(),
+        private readonly INameMapper $nameMapper = new NullMapper(),
     ) {
         $this->reflector = new Reflector(
             $allowUntypedArrays,
@@ -106,7 +102,7 @@ final class JsonMapper
      *
      * @throws JsonMapperException
      */
-    private function mapToObject(stdClass $jsonData, string $className): object
+    public function mapToObject(stdClass $jsonData, string $className): object
     {
         try {
             $reflectionClass = new ReflectionClass($className);
@@ -125,7 +121,7 @@ final class JsonMapper
         $consumedJsonPropertyNames = [];
 
         foreach ($reflectionConstructor->getParameters() as $reflectionParameter) {
-            $jsonPropertyName = $this->phpToJsonNameMapper->mapName($reflectionParameter->getName());
+            $jsonPropertyName = $this->nameMapper->mapName($reflectionParameter);
             $consumedJsonPropertyNames[] = $jsonPropertyName;
 
             $parameters[$reflectionParameter->getName()] = $this->getParameterValue(
@@ -143,10 +139,10 @@ final class JsonMapper
                     throw new JsonMapperException([
                         sprintf(
                             'Unexpected property "%s" in JSON data: ' .
-                            '%s::__construct() does not have a corresponding $%s parameter.',
+                            '%s::__construct() does not have a corresponding $%s parameter or is not mapped correctly according to the chosed NameMapper.',
                             $jsonPropertyName,
                             $className,
-                            $this->jsonToPhpNameMapper->mapName($jsonPropertyName),
+                            $jsonPropertyName,
                         ),
                         'If you want to allow extra properties, change the $onExtraProperties option.',
                     ]);
